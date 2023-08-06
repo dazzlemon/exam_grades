@@ -2,10 +2,12 @@
 from pathlib import Path
 from my_parser import parse_data
 from read_fah import read_fah, FAH, TZNK, ENG
+from functional import seq
 
 grades = read_fah('grades.txt') \
     .filter(lambda r: r is not None) \
     .filter(lambda r: r['name'] != 'Сафонов Д. Є.') \
+    .filter(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
     .list()
 
 grades.append({
@@ -23,15 +25,9 @@ grades.append({
 html_content = Path('list.html').read_text()
 parsed_data = parse_data(html_content)
 
-def get_element_by_fullname(fullname):
-    for element in parsed_data:
-        if element['name'] == fullname and element['status'] != 'Скасовано (втрата пріор.)':
-            return element
-    return None
-
 actual_grades = []
 for row in grades:
-    parsed = get_element_by_fullname(row['name'])
+    parsed = seq(parsed_data).find(lambda r: r['name'] == row['name'])
     if parsed is None:
         actual_grades.append(row)
     else:
