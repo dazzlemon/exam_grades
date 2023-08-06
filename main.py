@@ -1,8 +1,9 @@
 """Script"""
 from pathlib import Path
+from functional import seq
 from my_parser import parse_data
 from read_fah import read_fah, FAH, TZNK, ENG
-from functional import seq
+from merge import merge
 
 grades = read_fah('grades.txt') \
     .filter(lambda r: r is not None) \
@@ -24,27 +25,7 @@ grades.append({
 html_content = Path('list.html').read_text()
 parsed_data = parse_data(html_content)
 
-actual_grades = []
-for row in grades:
-    parsed = seq(parsed_data).find(lambda r: r['name'] == row['name'])
-    if parsed is None:
-        actual_grades.append(row)
-        continue
-
-    if parsed['details'].get(FAH) is not None:
-        actual_grades.append(parsed)
-        continue
-
-    grade = float(parsed['score']) + row['details'][FAH] * 0.6
-
-    actual_grades.append({
-        **parsed,
-        'score': grade,
-        'details': {
-            **parsed['details'],
-            FAH: row['details'][FAH],
-        }
-    })
+actual_grades = merge(parsed_data, grades)
 
 actual_grades = seq(actual_grades) \
     .where(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
