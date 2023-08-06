@@ -22,11 +22,12 @@ grades.append({
 html_content = Path('list.html').read_text()
 parsed_data = parse_data(html_content)
 
-actual_grades = merge(parsed_data, grades)
+grades = merge(parsed_data, grades)
 
-actual_grades = seq(actual_grades) \
+actual_grades = seq(grades) \
     .where(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
     .where(lambda r: r['priority'] != 'К') \
+    .where(lambda r: r[FAH] != 0) \
     .map(lambda r: {
         **r,
         'score': round( r[FAH] * 0.6
@@ -58,4 +59,28 @@ for i, row in enumerate(actual_grades):
         row[ENG],
         row[TZNK],
         row[FAH],
+    )
+
+invalid_grades = seq(grades) \
+    .where(lambda r: r['status'] == 'Скасовано (втрата пріор.)'
+                  or r['priority'] == 'К'
+                  or r[FAH] == 0) \
+    .map(lambda r: {
+        **r,
+        'score': 0
+    }) \
+    .sorted(key=lambda x: float(x['score']), reverse=True) \
+    .list()
+
+print('\ninvalid\n')
+for i, row in enumerate(invalid_grades):
+    print_row(
+        i+1,
+        row['name'],
+        row['score'],
+        'invalid fah' if row['status'] == 'Speculative' else row['status'],
+        row['priority'],
+        row.get(ENG),
+        row.get(TZNK),
+        row.get(FAH),
     )

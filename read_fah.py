@@ -12,16 +12,13 @@ def line_to_record(line):
     patronymic, rest = rest.split(' ', 1)
     grade = rest.split()[0]
 
-    if grade == 'н/з':
-        return None
-
     return {
         'name': f'{lastname} {firstname[0]}. {patronymic[0]}.',
         'status': 'Speculative',
         'priority': '0',
         ENG: 200,
         TZNK: 200,
-        FAH: int(grade),
+        FAH: 0 if grade == 'н/з' else int(grade),
     }
 
 def read_fah(filename):
