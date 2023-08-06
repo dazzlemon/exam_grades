@@ -16,15 +16,12 @@ def line_to_record(line):
         return None
 
     return {
-        'score': int(grade) * 0.6 + 200 * 0.4,
         'name': f'{lastname} {firstname[0]}. {patronymic[0]}.',
         'status': 'Speculative',
         'priority': '0',
-        'details': {
-            ENG: 200,
-            TZNK: 200,
-            FAH: int(grade),
-        }
+        ENG: 200,
+        TZNK: 200,
+        FAH: int(grade),
     }
 
 def read_fah(filename):

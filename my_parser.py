@@ -20,14 +20,16 @@ def parse_data(html_content):
             'name': 'ПІБ',
             'status': 'Стан',
             'priority': 'П',
-            'score': 'Бал',
             'details': 'Деталізація'
         }
 
         for key, val in attrs.items():
             attrs[key] = row.find('td', attrs={'data-th': val}).text.strip()
 
-        attrs['details'] = parse_details(attrs['details'])
+        attrs = (lambda details, **kw: {
+            **kw,
+            **parse_details(attrs['details'])
+        })(**attrs)
         data_list.append(attrs)
 
     return data_list

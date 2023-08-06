@@ -11,15 +11,12 @@ grades = read_fah('grades.txt') \
     .list()
 
 grades.append({
-    'score': 183.8,
     'name': 'Сафонов Д. Є.',
     'status': 'Waiting room',
     'priority': '1',
-    'details': {
-        ENG: 187,
-        TZNK: 168,
-        FAH: 188,
-    }
+    ENG: 187,
+    TZNK: 168,
+    FAH: 188,
 })
 
 html_content = Path('list.html').read_text()
@@ -30,6 +27,12 @@ actual_grades = merge(parsed_data, grades)
 actual_grades = seq(actual_grades) \
     .where(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
     .where(lambda r: r['priority'] != 'К') \
+    .map(lambda r: {
+        **r,
+        'score': round( r[FAH] * 0.6
+                      + r[ENG] * 0.2
+                      + r[TZNK] * 0.2, 1)
+    }) \
     .sorted(key=lambda x: float(x['score']), reverse=True) \
     .list()
 
@@ -46,14 +49,13 @@ def print_row(i, name, score, status, priority, eng, tznk, fah):
 print_row('#', 'name', 'score', 'status', 'p', 'eng', 'tznk', 'fah')
 print('')
 for i, row in enumerate(actual_grades):
-    details = row['details']
     print_row(
         i+1,
         row['name'],
-        float(row['score']),
+        row['score'],
         row['status'],
         row['priority'],
-        details[ENG],
-        details[TZNK],
-        details[FAH],
+        row[ENG],
+        row[TZNK],
+        row[FAH],
     )

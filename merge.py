@@ -1,5 +1,5 @@
 from functional import seq
-from read_fah import read_fah, FAH, TZNK, ENG
+from read_fah import FAH
 
 def merge(parsed_data, fah):
     actual_grades = []
@@ -9,18 +9,12 @@ def merge(parsed_data, fah):
             actual_grades.append(row)
             continue
     
-        if parsed['details'].get(FAH) is not None:
+        if parsed.get(FAH) is not None:
             actual_grades.append(parsed)
             continue
     
-        grade = float(parsed['score']) + row['details'][FAH] * 0.6
-    
         actual_grades.append({
             **parsed,
-            'score': grade,
-            'details': {
-                **parsed['details'],
-                FAH: row['details'][FAH],
-            }
+            FAH: row[FAH],
         })
     return actual_grades
