@@ -38,10 +38,8 @@ for row in grades:
     grade = float(parsed['score']) + row['details'][FAH] * 0.6
 
     actual_grades.append({
+        **parsed,
         'score': grade,
-        'name': row['name'],
-        'status': parsed['status'],
-        'priority': parsed['priority'],
         'details': {
             **parsed['details'],
             FAH: row['details'][FAH],
