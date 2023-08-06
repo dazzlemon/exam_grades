@@ -4,6 +4,7 @@ from functional import seq
 from my_parser import parse_data
 from read_fah import read_fah, FAH, TZNK, ENG
 from merge import merge
+from printer import print_row, print_rows
 
 grades = read_fah('grades.txt') \
     .filter(lambda r: r is not None) \
@@ -37,29 +38,9 @@ actual_grades = seq(grades) \
     .sorted(key=lambda x: float(x['score']), reverse=True) \
     .list()
 
-def print_row(i, name, score, status, priority, eng, tznk, fah):
-    print(
-        f'{i:>2}',
-        f'{name:<20}',
-        f'{score:<5}',
-        f'{status:<25}',
-        priority,
-        f'{eng}/{tznk}/{fah}'
-    )
-
 print_row('#', 'name', 'score', 'status', 'p', 'eng', 'tznk', 'fah')
 print('')
-for i, row in enumerate(actual_grades):
-    print_row(
-        i+1,
-        row['name'],
-        row['score'],
-        row['status'],
-        row['priority'],
-        row[ENG],
-        row[TZNK],
-        row[FAH],
-    )
+print_rows(actual_grades)
 
 invalid_grades = seq(grades) \
     .where(lambda r: r['status'] == 'Скасовано (втрата пріор.)'
@@ -67,20 +48,11 @@ invalid_grades = seq(grades) \
                   or r[FAH] == 0) \
     .map(lambda r: {
         **r,
+        'status': r['status'] if r['status'] != 'Speculative' else 'invalid fah',
         'score': 0
     }) \
     .sorted(key=lambda x: float(x['score']), reverse=True) \
     .list()
 
 print('\ninvalid\n')
-for i, row in enumerate(invalid_grades):
-    print_row(
-        i+1,
-        row['name'],
-        row['score'],
-        'invalid fah' if row['status'] == 'Speculative' else row['status'],
-        row['priority'],
-        row.get(ENG),
-        row.get(TZNK),
-        row.get(FAH),
-    )
+print_rows(invalid_grades)
