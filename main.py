@@ -33,33 +33,27 @@ actual_grades = seq(actual_grades) \
     .sorted(key=lambda x: float(x['score']), reverse=True) \
     .list()
 
-i = '#'
-name = 'name'
-score = 'score'
-status = 'status'
-print(
-    f'{i:>2}',
-    f'{name:<20}',
-    f'{score:<5}',
-    f'{status:<25}',
-    'p',
-    'eng/tznk/fah'
-)
-print('')
-for i, row in enumerate(actual_grades):
-    details = row['details']
-    eng = details[ENG]
-    tznk = details[TZNK]
-    fah = details.get(FAH)
-
-    name = row['name']
-    score = float(row['score'])
-    status = row['status']
+def print_row(i, name, score, status, priority, eng, tznk, fah):
     print(
-        f'{i+1:>2}',
+        f'{i:>2}',
         f'{name:<20}',
         f'{score:<5}',
         f'{status:<25}',
-        row['priority'],
+        priority,
         f'{eng}/{tznk}/{fah}'
+    )
+
+print_row('#', 'name', 'score', 'status', 'p', 'eng', 'tznk', 'fah')
+print('')
+for i, row in enumerate(actual_grades):
+    details = row['details']
+    print_row(
+        i+1,
+        row['name'],
+        float(row['score']),
+        row['status'],
+        row['priority'],
+        details[ENG],
+        details[TZNK],
+        details[FAH],
     )
