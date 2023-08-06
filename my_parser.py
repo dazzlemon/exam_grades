@@ -16,23 +16,18 @@ def parse_data(html_content):
     rows = soup.select('tr[class^="rstatus"]')
 
     for row in rows:
-        # Extract individual data fields
-        full_name = row.find('td', attrs={'data-th': 'ПІБ'}).text.strip()
-        status = row.find('td', attrs={'data-th': 'Стан'}).text.strip()
-        priority = row.find('td', attrs={'data-th': 'П'}).text.strip()
-        score = row.find('td', attrs={'data-th': 'Бал'}).text.strip()
-        details = row.find('td', attrs={'data-th': 'Деталізація'}).text.strip()
+        attrs = {
+            'name': 'ПІБ',
+            'status': 'Стан',
+            'priority': 'П',
+            'score': 'Бал',
+            'details': 'Деталізація'
+        }
 
-        # Parse the details and extract subjects with scores
-        parsed_details = parse_details(details)
+        for key, val in attrs.items():
+            attrs[key] = row.find('td', attrs={'data-th': val}).text.strip()
 
-        # Append the extracted data as a dictionary to the list
-        data_list.append({
-            'name': full_name,
-            'status': status,
-            'priority': priority,
-            'score': score,
-            'details': parsed_details
-        })
+        attrs['details'] = parse_details(attrs['details'])
+        data_list.append(attrs)
 
     return data_list
