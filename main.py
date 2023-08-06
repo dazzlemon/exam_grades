@@ -30,22 +30,24 @@ for row in grades:
     parsed = seq(parsed_data).find(lambda r: r['name'] == row['name'])
     if parsed is None:
         actual_grades.append(row)
-    else:
-        if parsed['details'].get(FAH) is None:
-            grade = float(parsed['score']) + row['details'][FAH] * 0.6
+        continue
 
-            actual_grades.append({
-                'score': grade,
-                'name': row['name'],
-                'status': parsed['status'],
-                'priority': parsed['priority'],
-                'details': {
-                    **parsed['details'],
-                    FAH: row['details'][FAH],
-                }
-            })
-        else:
-            actual_grades.append(parsed)
+    if parsed['details'].get(FAH) is not None:
+        actual_grades.append(parsed)
+        continue
+
+    grade = float(parsed['score']) + row['details'][FAH] * 0.6
+
+    actual_grades.append({
+        'score': grade,
+        'name': row['name'],
+        'status': parsed['status'],
+        'priority': parsed['priority'],
+        'details': {
+            **parsed['details'],
+            FAH: row['details'][FAH],
+        }
+    })
 
 for row in parsed_data:
     if row['status'] == 'Скасовано (втрата пріор.)':
