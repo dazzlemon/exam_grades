@@ -7,7 +7,6 @@ from functional import seq
 grades = read_fah('grades.txt') \
     .filter(lambda r: r is not None) \
     .filter(lambda r: r['name'] != 'Сафонов Д. Є.') \
-    .filter(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
     .list()
 
 grades.append({
@@ -49,17 +48,11 @@ for row in grades:
         }
     })
 
-for row in parsed_data:
-    if row['status'] == 'Скасовано (втрата пріор.)':
-        continue
-    should_append = True
-    for element in grades:
-        if element['name'] == row['name'] and row['status']:
-            should_append = False
-    if should_append:
-        actual_grades.append(row)
-
-actual_grades.sort(key=lambda x: float(x['score']), reverse=True)
+actual_grades = seq(actual_grades) \
+    .where(lambda r: r['status'] != 'Скасовано (втрата пріор.)') \
+    .where(lambda r: r['priority'] != 'К') \
+    .sorted(key=lambda x: float(x['score']), reverse=True) \
+    .list()
 
 i = '#'
 name = 'name'
@@ -68,7 +61,7 @@ status = 'status'
 print(
     f'{i:>2}',
     f'{name:<20}',
-    f'{score:<7}',
+    f'{score:<5}',
     f'{status:<25}',
     'p',
     'eng/tznk/fah'
@@ -81,12 +74,12 @@ for i, row in enumerate(actual_grades):
     fah = details.get(FAH)
 
     name = row['name']
-    score = row['score']
+    score = float(row['score'])
     status = row['status']
     print(
         f'{i+1:>2}',
         f'{name:<20}',
-        f'{score:<7}',
+        f'{score:<5}',
         f'{status:<25}',
         row['priority'],
         f'{eng}/{tznk}/{fah}'
