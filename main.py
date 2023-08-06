@@ -1,52 +1,26 @@
 """Script"""
 from pathlib import Path
-from functional import seq
 from my_parser import parse_data
+from read_fah import read_fah, FAH, TZNK, ENG
 
-FILENAME = 'grades.txt'
+grades = read_fah('grades.txt') \
+    .filter(lambda r: r is not None) \
+    .filter(lambda r: r['name'] != 'Сафонов Д. Є.') \
+    .list()
 
-# pylint: disable-next=unspecified-encoding
-text = Path(FILENAME).read_text()
-lines = text.splitlines()
+grades.append({
+    'score': 183.8,
+    'name': 'Сафонов Д. Є.',
+    'status': 'Waiting room',
+    'priority': '1',
+    'details': {
+        ENG: 187,
+        TZNK: 168,
+        FAH: 188,
+    }
+})
 
-grades = []
-
-for line in lines:
-    _, rest = line.split(' ', 1)
-    lastname, rest = rest.split(' ', 1)
-    firstname, rest = rest.split(' ', 1)
-    patronymic, rest = rest.split(' ', 1)
-    grade = rest.split()[0]
-    if grade == 'н/з':
-        continue
-    if lastname == 'Сафонов':
-        grades.append({
-            'score': 183.8,
-            'name': f'{lastname} {firstname[0]}. {patronymic[0]}.',
-            'status': 'Waiting room',
-            'priority': '1',
-            'details': {
-                'Іноземна мова (англійська, німецька, французька або іспанська)': 187,
-                'ТЗНК': 168,
-                'Фаховий іспит': 188,
-            }
-        })
-    else:
-        grades.append({
-            'score': int(grade) * 0.6 + 200 * 0.4,
-            'name': f'{lastname} {firstname[0]}. {patronymic[0]}.',
-            'status': 'Speculative',
-            'priority': '0',
-            'details': {
-                'Іноземна мова (англійська, німецька, французька або іспанська)': 200,
-                'ТЗНК': 200,
-                'Фаховий іспит': int(grade),
-            }
-        })
-
-with open('list.html', 'r', encoding='utf-8') as file:
-    html_content = file.read()
-
+html_content = Path('list.html').read_text()
 parsed_data = parse_data(html_content)
 
 def get_element_by_fullname(fullname):
@@ -61,8 +35,8 @@ for row in grades:
     if parsed is None:
         actual_grades.append(row)
     else:
-        if parsed['details'].get('Фаховий іспит') is None:
-            grade = float(parsed['score']) + row['details']['Фаховий іспит'] * 0.6
+        if parsed['details'].get(FAH) is None:
+            grade = float(parsed['score']) + row['details'][FAH] * 0.6
 
             actual_grades.append({
                 'score': grade,
@@ -71,7 +45,7 @@ for row in grades:
                 'priority': parsed['priority'],
                 'details': {
                     **parsed['details'],
-                    'Фаховий іспит': row['details']['Фаховий іспит'],
+                    FAH: row['details'][FAH],
                 }
             })
         else:
@@ -103,9 +77,11 @@ print(
 )
 print('')
 for i, row in enumerate(actual_grades):
-    eng = row['details']['Іноземна мова (англійська, німецька, французька або іспанська)']
-    tznk = row['details']['ТЗНК']
-    fah = row['details'].get('Фаховий іспит')
+    details = row['details']
+    eng = details[ENG]
+    tznk = details[TZNK]
+    fah = details.get(FAH)
+
     name = row['name']
     score = row['score']
     status = row['status']
